@@ -17,8 +17,10 @@ package de.redsix.pdfcompare;
 
 import de.redsix.pdfcompare.env.Environment;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.PageLayout;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
@@ -67,6 +69,8 @@ public class CompareResultImpl implements ResultCollector, CompareResult {
         if (hasImages()) {
             try (PDDocument document = new PDDocument()) {
                 addImagesToDocument(document);
+                PDDocumentCatalog catalog = document.getDocumentCatalog();
+                catalog.setPageLayout(PageLayout.TWO_PAGE_LEFT);
                 saver.accept(document);
             } catch (IOException e) {
                 throw new RuntimeException(e);
