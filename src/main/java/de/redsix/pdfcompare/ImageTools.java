@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 
 public class ImageTools {
 
-    public static final int EXCLUDED_BACKGROUND_RGB = new Color(255, 255, 100).getRGB();
+    public static final int EXCLUDED_BACKGROUND_RGB = new Color(255, 255, 240).getRGB();
 
     public static BufferedImage blankImage(final BufferedImage image) {
         Graphics2D graphics = image.createGraphics();
@@ -28,7 +28,7 @@ public class ImageTools {
     }
 
     private static int fade(final int i) {
-        return i + ((255 - i) * 3 / 5);
+        return i + ((255 - i) * 4 / 5);
     }
 
     public static BufferedImage deepCopy(BufferedImage image) {

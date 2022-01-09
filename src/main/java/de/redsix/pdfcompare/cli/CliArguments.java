@@ -2,6 +2,7 @@ package de.redsix.pdfcompare.cli;
 
 import de.redsix.pdfcompare.CompareResult;
 import de.redsix.pdfcompare.CompareResultImpl;
+import de.redsix.pdfcompare.CompareResultImpl_SHLife;
 import de.redsix.pdfcompare.PdfComparator;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
@@ -139,7 +140,7 @@ public class CliArguments {
 
     private int doCompare() {
         try {
-            PdfComparator<CompareResultImpl> pdfComparator = new PdfComparator<>(getExpectedFile().get(), getActualFile().get());
+            PdfComparator<CompareResultImpl> pdfComparator = new PdfComparator<>(getExpectedFile().get(), getActualFile().get(), new CompareResultImpl_SHLife());
             getExclusionsFile().ifPresent(pdfComparator::withIgnore);
             getExpectedPassword().ifPresent(pdfComparator::withExpectedPassword);
             getActualPassword().ifPresent(pdfComparator::withActualPassword);

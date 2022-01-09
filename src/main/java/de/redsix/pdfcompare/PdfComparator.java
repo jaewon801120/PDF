@@ -454,7 +454,7 @@ public class PdfComparator<T extends CompareResultImpl> {
                         .submit(() -> renderPageAsImage(actualDocument, actualPdfRenderer, pageIndex, environment));
                 final ImageWithDimension expectedImage = getImage(expectedImageFuture, pageIndex, "expected document");
                 final ImageWithDimension actualImage = getImage(actualImageFuture, pageIndex, "actual document");
-                final DiffImage diffImage = new DiffImage(expectedImage, actualImage, pageIndex, environment, getExclusions(), compareResult);
+                final DiffImage_SHLife diffImage = new DiffImage_SHLife(expectedImage, actualImage, pageIndex, environment, getExclusions(), compareResult);
                 LOG.trace("Enqueueing page {}.", pageIndex);
                 diffExecutor.execute(() -> {
                     LOG.trace("Diffing page {}", diffImage);
@@ -505,23 +505,23 @@ public class PdfComparator<T extends CompareResultImpl> {
 
     private void addExtraPages(final PDDocument document, final PDFRenderer pdfRenderer, final int minPageCount,
             final int color, final boolean expected) throws IOException {
-        for (int pageIndex = minPageCount; pageIndex < document.getNumberOfPages(); pageIndex++) {
-            ImageWithDimension image = renderPageAsImage(document, pdfRenderer, pageIndex, environment);
-            final DataBuffer dataBuffer = image.bufferedImage.getRaster().getDataBuffer();
-            for (int i = 0; i < image.bufferedImage.getWidth() * MARKER_WIDTH; i++) {
-                dataBuffer.setElem(i, color);
-            }
-            for (int i = 0; i < image.bufferedImage.getHeight(); i++) {
-                for (int j = 0; j < MARKER_WIDTH; j++) {
-                    dataBuffer.setElem(i * image.bufferedImage.getWidth() + j, color);
-                }
-            }
-            if (expected) {
-                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, image, blank(image), image);
-            } else {
-                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, blank(image), image, image);
-            }
-        }
+//        for (int pageIndex = minPageCount; pageIndex < document.getNumberOfPages(); pageIndex++) {
+//            ImageWithDimension image = renderPageAsImage(document, pdfRenderer, pageIndex, environment);
+//            final DataBuffer dataBuffer = image.bufferedImage.getRaster().getDataBuffer();
+//            for (int i = 0; i < image.bufferedImage.getWidth() * MARKER_WIDTH; i++) {
+//                dataBuffer.setElem(i, color);
+//            }
+//            for (int i = 0; i < image.bufferedImage.getHeight(); i++) {
+//                for (int j = 0; j < MARKER_WIDTH; j++) {
+//                    dataBuffer.setElem(i * image.bufferedImage.getWidth() + j, color);
+//                }
+//            }
+//            if (expected) {
+//                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, image, blank(image), image);
+//            } else {
+//                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, blank(image), image, image);
+//            }
+//        }
     }
 
     private static ImageWithDimension blank(final ImageWithDimension image) {
