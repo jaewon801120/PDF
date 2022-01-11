@@ -5,7 +5,13 @@ import static de.redsix.pdfcompare.PdfComparator.MARKER_WIDTH;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.apache.pdfbox.tools.imageio.ImageIOUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +60,17 @@ public class DiffImage_SHLife {
     public void diffImages() {
         BufferedImage expectBuffImage = this.expectedImage.bufferedImage;
         BufferedImage actualBuffImage = this.actualImage.bufferedImage;
+//        try {
+//        	Path path = Paths.get("./img");
+//        	Files.createDirectories(path);
+//        	String expect = path.toAbsolutePath().toString() + File.separator + page + "_expect.png";
+//        	String actual = path.toAbsolutePath().toString() + File.separator + page + "_actual.png";
+//            ImageIOUtil.writeImage(expectBuffImage, expect, environment.getDPI());
+//			ImageIOUtil.writeImage(actualBuffImage, actual, environment.getDPI());
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
         expectedBuffer = expectBuffImage.getRaster().getDataBuffer();
         actualBuffer = actualBuffImage.getRaster().getDataBuffer();
 
@@ -64,6 +81,7 @@ public class DiffImage_SHLife {
 
         int resultImageWidth = Math.max(expectedImageWidth, actualImageWidth);
         int resultImageHeight = Math.max(expectedImageHeight, actualImageHeight);
+
         //resultImage = new BufferedImage(resultImageWidth, resultImageHeight, actualBuffImage.getType());
         expectedResultImage = new BufferedImage(resultImageWidth, resultImageHeight, expectBuffImage.getType());
         actualResultImage = new BufferedImage(resultImageWidth, resultImageHeight, actualBuffImage.getType());
@@ -81,13 +99,11 @@ public class DiffImage_SHLife {
             final int expectedLineOffset = y * expectedImageWidth;
             final int actualLineOffset = y * actualImageWidth;
             final int resultLineOffset = y * resultImageWidth;
-            int nStart = -1;
-            int nLast = -1;
             for (int x = 0; x < resultImageWidth; x++) {
                 expectedElement = getExpectedElement(x, y, expectedLineOffset);
                 actualElement = getActualElement(x, y, actualLineOffset);
-                
                 //int element = getElement(expectedElement, actualElement);
+            	
                 int element = -1;
                 if (pageExclusions.contains(x, y)) {
                 	element = getElement(expectedElement, actualElement);
@@ -102,18 +118,10 @@ public class DiffImage_SHLife {
                     if (expectedElement != actualElement) {
                         extendDiffArea(x, y);
                         diffCalculator.diffFound();
-                        //LOG.trace("Difference found on page: {} at x: {}, y: {}", page + 1, x, y);
+                        //LOG.trace("Difference found on page: {} at x: {}, y: {}, expected : {}, actual : {}", page + 1, x, y, expectedElement, actualElement);
                         //mark(resultBuffer, x, y, resultImageWidth);
                         mark(expectedResultBuffer, x, y, resultImageWidth);
                         mark(actualResultBuffer, x, y, resultImageWidth);
-                        
-                        if (nStart == -1) {
-                        	nStart = x;
-                        }
-                        
-                        if (nLast - nStart > 50) {
-                        	nStart = x;
-                        }
                         
                         int expectedIntensity = calcCombinedIntensity(expectedElement);
                         int actualIntensity = calcCombinedIntensity(actualElement);

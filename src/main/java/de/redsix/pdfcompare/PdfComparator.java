@@ -28,6 +28,7 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.io.*;
@@ -505,23 +506,23 @@ public class PdfComparator<T extends CompareResultImpl> {
 
     private void addExtraPages(final PDDocument document, final PDFRenderer pdfRenderer, final int minPageCount,
             final int color, final boolean expected) throws IOException {
-//        for (int pageIndex = minPageCount; pageIndex < document.getNumberOfPages(); pageIndex++) {
-//            ImageWithDimension image = renderPageAsImage(document, pdfRenderer, pageIndex, environment);
-//            final DataBuffer dataBuffer = image.bufferedImage.getRaster().getDataBuffer();
-//            for (int i = 0; i < image.bufferedImage.getWidth() * MARKER_WIDTH; i++) {
-//                dataBuffer.setElem(i, color);
-//            }
-//            for (int i = 0; i < image.bufferedImage.getHeight(); i++) {
-//                for (int j = 0; j < MARKER_WIDTH; j++) {
-//                    dataBuffer.setElem(i * image.bufferedImage.getWidth() + j, color);
-//                }
-//            }
-//            if (expected) {
-//                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, image, blank(image), image);
-//            } else {
-//                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, blank(image), image, image);
-//            }
-//        }
+        for (int pageIndex = minPageCount; pageIndex < document.getNumberOfPages(); pageIndex++) {
+            ImageWithDimension image = renderPageAsImage(document, pdfRenderer, pageIndex, environment);
+            final DataBuffer dataBuffer = image.bufferedImage.getRaster().getDataBuffer();
+            for (int i = 0; i < image.bufferedImage.getWidth() * MARKER_WIDTH; i++) {
+                dataBuffer.setElem(i, color);
+            }
+            for (int i = 0; i < image.bufferedImage.getHeight(); i++) {
+                for (int j = 0; j < MARKER_WIDTH; j++) {
+                    dataBuffer.setElem(i * image.bufferedImage.getWidth() + j, color);
+                }
+            }
+            if (expected) {
+                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, image, blank(image), image);
+            } else {
+                compareResult.addPage(new PageDiffCalculator(new PageArea(pageIndex + 1)), pageIndex, blank(image), image, image);
+            }
+        }
     }
 
     private static ImageWithDimension blank(final ImageWithDimension image) {
@@ -532,6 +533,9 @@ public class PdfComparator<T extends CompareResultImpl> {
 
     public static ImageWithDimension renderPageAsImage(final PDDocument document, final PDFRenderer expectedPdfRenderer, final int pageIndex,
             Environment environment) throws IOException {
+    	if (!environment.getAntiAliasing()) {
+    		expectedPdfRenderer.setRenderingHints(createCustomRenderingHints());
+    	}
         final BufferedImage bufferedImage = expectedPdfRenderer.renderImageWithDPI(pageIndex, environment.getDPI());
         final PDPage page = document.getPage(pageIndex);
         final PDRectangle mediaBox = page.getMediaBox();
@@ -540,6 +544,15 @@ public class PdfComparator<T extends CompareResultImpl> {
         } else {
             return new ImageWithDimension(bufferedImage, mediaBox.getWidth(), mediaBox.getHeight());
         }
+    }
+
+    private static RenderingHints createCustomRenderingHints()
+    {
+        RenderingHints r = new RenderingHints(null);
+        r.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        r.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        r.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        return r;
     }
 
     public T getResult() {

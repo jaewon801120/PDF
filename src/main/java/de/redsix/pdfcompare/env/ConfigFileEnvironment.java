@@ -125,6 +125,11 @@ public class ConfigFileEnvironment implements Environment {
     }
 
     @Override
+    public boolean getAntiAliasing() {
+        return config.getBoolean("antiAliasing");
+    }
+
+    @Override
     public boolean addEqualPagesToResult() {
         return config.getBoolean("addEqualPagesToResult");
     }

@@ -35,6 +35,7 @@ public class SimpleEnvironment implements Environment {
     private Color expectedColor;
     private Color actualColor;
     private Integer dpi;
+    private Boolean antiAliasing;
     private Boolean addEqualPagesToResult;
     private Boolean failOnMissingIgnoreFile;
 
@@ -164,6 +165,16 @@ public class SimpleEnvironment implements Environment {
 
     public SimpleEnvironment setDPI(int dpi) {
         this.dpi = dpi;
+        return this;
+    }
+
+    @Override
+    public boolean getAntiAliasing() {
+        return antiAliasing != null ? antiAliasing : fallback.getAntiAliasing();
+    }
+
+    public SimpleEnvironment setAntiAliasing(boolean antiAliasing) {
+        this.antiAliasing = antiAliasing;
         return this;
     }
 

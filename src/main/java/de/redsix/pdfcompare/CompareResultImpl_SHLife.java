@@ -132,33 +132,16 @@ public class CompareResultImpl_SHLife extends CompareResultImpl {
         Objects.requireNonNull(actualImage, "actualImage is null");
         Objects.requireNonNull(diffImage, "diffImage is null");
         this.hasDifferenceInExclusion |= diffCalculator.differencesFoundInExclusion();
-        
-        int page = pageIndex;
-        //int page = pageIndex * 2;
-        
-        diffPercentages.put(page, diffCalculator.getDifferenceInPercent());
+        diffPercentages.put(pageIndex, diffCalculator.getDifferenceInPercent());
         if (diffCalculator.differencesFound()) {
             isEqual = false;
             diffAreas.add(diffCalculator.getDiffArea());
-            diffImages.put(page, diffImage);
+            diffImages.put(pageIndex, diffImage);
             pages++;
         } else if (environment.addEqualPagesToResult()) {
-            diffImages.put(page, diffImage);
+            diffImages.put(pageIndex, diffImage);
             pages++;
         }
-        
-//        page++;
-//        
-//        diffPercentages.put(pages, diffCalculator.getDifferenceInPercent());
-//        if (diffCalculator.differencesFound()) {
-//            isEqual = false;
-//            diffAreas.add(diffCalculator.getDiffArea());
-//            diffImages.put(pages, actualImage);
-//            pages++;
-//        } else if (environment.addEqualPagesToResult()) {
-//            diffImages.put(pages, actualImage);
-//            pages++;
-//        }
     }
 
     @Override

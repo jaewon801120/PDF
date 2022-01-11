@@ -4,10 +4,14 @@ import de.redsix.pdfcompare.CompareResult;
 import de.redsix.pdfcompare.CompareResultImpl;
 import de.redsix.pdfcompare.CompareResultImpl_SHLife;
 import de.redsix.pdfcompare.PdfComparator;
+import de.redsix.pdfcompare.env.ConfigFileEnvironment;
+import de.redsix.pdfcompare.env.SimpleEnvironment;
+
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -131,16 +135,59 @@ public class CliArguments {
             return printHelp();
         }
         if (hasFileArguments()) {
-            return doCompare();
+            return doCompare_SHLife();
         }
         System.out.println("No files or too many files where passed as arguments\n");
         printHelp();
         return ERROR_RESULT_VALUE;
     }
 
-    private int doCompare() {
+    private int doCompare_SHLife() {
         try {
             PdfComparator<CompareResultImpl> pdfComparator = new PdfComparator<>(getExpectedFile().get(), getActualFile().get(), new CompareResultImpl_SHLife());
+
+        	File fConfig = new File("D:\\Download\\jar\\PDF\\reference.conf");
+        	if (!fConfig.isFile()) {
+        		SimpleEnvironment simpleEnv = new SimpleEnvironment();
+        		simpleEnv.setNrOfImagesToCache(30);
+        		simpleEnv.setMaxImageSize(100000);
+        		simpleEnv.setMergeCacheSize(100);
+        		simpleEnv.setSwapCacheSize(100);
+        		simpleEnv.setDocumentCacheSize(200);
+        		simpleEnv.setParallelProcessing(false);
+        		simpleEnv.setOverallTimeout(15);
+        		simpleEnv.setAllowedDiffInPercent(0);
+        		simpleEnv.setDPI(100);
+        		simpleEnv.setAddEqualPagesToResult(false);
+        		simpleEnv.setFailOnMissingIgnoreFile(false);
+        		simpleEnv.setAntiAliasing(false);
+        		
+        		pdfComparator.withEnvironment(simpleEnv);
+        	}
+        	else {
+        		ConfigFileEnvironment configEnv = new ConfigFileEnvironment(fConfig);
+            	pdfComparator.withEnvironment(configEnv);
+        	}
+        	
+            //System.setProperty("config.file", "D:\\repository\\PDFCompare\\src\\main\\resources\\reference.conf");
+            getExclusionsFile().ifPresent(pdfComparator::withIgnore);
+            getExpectedPassword().ifPresent(pdfComparator::withExpectedPassword);
+            getActualPassword().ifPresent(pdfComparator::withActualPassword);
+            System.out.println("compare");
+            CompareResult compareResult = pdfComparator.compare();
+            System.out.println("write");
+            getOutputFile().ifPresent(compareResult::writeTo);
+            System.out.println(String.valueOf(compareResult.isEqual()));
+            return (compareResult.isEqual()) ? EQUAL_DOCUMENTS_RESULT_VALUE : UNEQUAL_DOCUMENTS_RESULT_VALUE;
+        } catch (IOException ex) {
+            LOG.error(ex.getMessage());
+            return ERROR_RESULT_VALUE;
+        }
+    }
+
+    private int doCompare() {
+        try {
+            PdfComparator<CompareResultImpl> pdfComparator = new PdfComparator<>(getExpectedFile().get(), getActualFile().get());
             getExclusionsFile().ifPresent(pdfComparator::withIgnore);
             getExpectedPassword().ifPresent(pdfComparator::withExpectedPassword);
             getActualPassword().ifPresent(pdfComparator::withActualPassword);
